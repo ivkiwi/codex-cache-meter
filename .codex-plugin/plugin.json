@@ -1,0 +1,23 @@
+{
+  "name": "cache-meter",
+  "version": "0.1.5",
+  "description": "Cache hit/miss metrics, natural resets, and Tibo's global-reset forecast for Codex App.",
+  "author": {
+    "name": "Ivan & Ada"
+  },
+  "license": "MIT",
+  "keywords": ["codex", "cache", "usage", "rate-limits", "tibo", "reset"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Cache Meter",
+    "shortDescription": "Cache metrics and Tibo reset forecast",
+    "longDescription": "Shows cache hit, miss, hit rate, effort changes, natural resets, and the current third-party Tibo global-reset forecast.",
+    "developerName": "Ivan & Ada",
+    "category": "Developer Tools",
+    "capabilities": ["Local session analytics", "Natural reset times", "Tibo global-reset forecast"],
+    "defaultPrompt": [
+      "Show my cache meter.",
+      "How is my Codex prompt cache doing?"
+    ]
+  }
+}

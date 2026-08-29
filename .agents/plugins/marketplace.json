@@ -1,0 +1,21 @@
+{
+  "name": "cache-meter",
+  "interface": {
+    "displayName": "Cache Meter"
+  },
+  "plugins": [
+    {
+      "name": "cache-meter",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/ivkiwi/cache-meter.git",
+        "ref": "main"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
