@@ -23,7 +23,7 @@ Cache Meter — локальный плагин для Codex. Он превра�
 ## Установка
 
 ```sh
-codex plugin marketplace add ivkiwi/cache-meter
+codex plugin marketplace add ivkiwi/codex-cache-meter
 codex plugin add cache-meter@cache-meter
 ```
 

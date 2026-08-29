@@ -8,7 +8,7 @@
       "name": "cache-meter",
       "source": {
         "source": "url",
-        "url": "https://github.com/ivkiwi/cache-meter.git",
+        "url": "https://github.com/ivkiwi/codex-cache-meter.git",
         "ref": "main"
       },
       "policy": {

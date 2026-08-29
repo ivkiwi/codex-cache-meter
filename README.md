@@ -23,7 +23,7 @@ Cache Meter is a local-first Codex plugin that turns session logs into a compact
 ## Install
 
 ```sh
-codex plugin marketplace add ivkiwi/cache-meter
+codex plugin marketplace add ivkiwi/codex-cache-meter
 codex plugin add cache-meter@cache-meter
 ```
 
