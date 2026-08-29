@@ -1,5 +1,5 @@
 ---
-description: Show Codex cache continuity, API equivalents, natural resets, and Tibo forecast
+description: See what the cache remembered, what switches lost, what it would cost, and when limits reset
 ---
 
 Use the installed `$cache-meter` skill. Render its report without adding a second summary.

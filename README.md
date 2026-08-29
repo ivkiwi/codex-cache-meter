@@ -1,12 +1,12 @@
 # Cache Meter
 
-[English](README.md) · [Русский](README.ru.md)
+[English](README.md) · [Русский](README.ru.md) · [简体中文](README.zh-CN.md)
 
-**Stop guessing where the cache went. Measure it.**
+**The cache remembers. Until you switch models.**
 
-Cache Meter is a local-first plugin for Codex App and CLI. It turns session logs into a compact report: cache hits and misses, model/effort switch costs, rate-limit resets, and the optional Tibo global-reset forecast.
+Cache Meter turns local Codex session logs into the report Codex forgot to put in one place: cache hits and misses, model/effort switch losses, recovery time, API-price equivalents, natural resets, and the optional Tibo global-reset crystal ball.
 
-When a model or effort switch knocks the cache cold, Cache Meter estimates how many cached tokens were lost and what the same traffic would cost at public API list prices. One command, local JSONL, no dashboard, no account API, no Python dependencies.
+When a switch knocks the cache cold, Cache Meter estimates how many cached tokens vanished and what the same traffic would cost at public API list prices. If the dollar figure looks like a small infrastructure budget, breathe: it is an API equivalent, not your Codex bill. One command, local JSONL, no dashboard safari, no account API, no Python dependencies.
 
 ```text
 | Scope           | Input | Cache hit | Cache miss | Hit rate | Output | API equivalent |

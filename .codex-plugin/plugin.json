@@ -1,7 +1,7 @@
 {
   "name": "cache-meter",
   "version": "0.2.1",
-  "description": "Local cache metrics, continuity loss, API equivalents, reset runway, and Tibo forecasts for Codex.",
+  "description": "See what the cache remembered, what a model switch made it forget, and what the same traffic would cost at API prices.",
   "author": {
     "name": "Ivan & Ada"
   },
@@ -10,8 +10,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Cache Meter",
-    "shortDescription": "Cache continuity, costs, and reset forecast",
-    "longDescription": "Shows cache hit rate, model and effort switches, estimated cache loss, API price equivalents, natural resets, and the current third-party Tibo forecast in Codex App and CLI.",
+    "shortDescription": "What the cache remembered, lost, and cost",
+    "longDescription": "Turns local Codex logs into cache hit rates, switch losses, recovery time, API-price equivalents, natural resets, and Tibo's third-party crystal ball—no dashboard safari.",
     "developerName": "Ivan & Ada",
     "category": "Developer Tools",
     "capabilities": ["Local session analytics", "Cache continuity estimates", "API price equivalents", "Natural reset times", "Tibo global-reset forecast"],
