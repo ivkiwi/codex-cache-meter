@@ -52,7 +52,7 @@ Skip the public forecast request with:
 
 ## Privacy
 
-Cache Meter reads local JSONL files under `$CODEX_HOME/sessions` (or `~/.codex/sessions`). It does not read `auth.json`, call Codex account APIs, invoke CodexBar, or report banked resets.
+Cache Meter reads local JSONL session files under `$CODEX_HOME/sessions` (or `~/.codex/sessions`). It does not access Codex credentials or account APIs.
 
 Unless `--no-tibo` is used, it makes one unauthenticated, read-only GET request to `https://codex-resets.com/api/v1/status`. The forecast is a third-party guess, not an OpenAI commitment.
 

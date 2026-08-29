@@ -52,7 +52,7 @@ codex plugin add cache-meter@cache-meter
 
 ## Приватность
 
-Cache Meter читает локальные JSONL-файлы из `$CODEX_HOME/sessions` (или `~/.codex/sessions`). Он не читает `auth.json`, не вызывает API аккаунта Codex, не запускает CodexBar и не показывает banked resets.
+Cache Meter читает локальные JSONL-файлы сессий из `$CODEX_HOME/sessions` (или `~/.codex/sessions`) и не обращается к учётным данным или API аккаунта Codex.
 
 Без `--no-tibo` выполняется один неавторизованный read-only GET-запрос к `https://codex-resets.com/api/v1/status`. Это сторонний прогноз, а не обещание OpenAI.
 
