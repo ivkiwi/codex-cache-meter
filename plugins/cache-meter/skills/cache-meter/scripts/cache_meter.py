@@ -609,7 +609,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 def fetch_tibo_status() -> dict[str, Any]:
     request = urllib.request.Request(
         TIBO_STATUS_URL,
-        headers={"Accept": "application/json", "User-Agent": "cache-meter/0.2.1"},
+        headers={"Accept": "application/json", "User-Agent": "cache-meter/0.2.2"},
     )
     with urllib.request.build_opener(NoRedirect).open(request, timeout=5) as response:
         raw = response.read(262_145)
@@ -665,7 +665,8 @@ def tibo_section(status: dict[str, Any] | None, now: datetime, error: str | None
         try:
             announced = parse_time(str(latest["announced_at"])).astimezone().strftime("%a %d %b, %H:%M")
             suffix = f" · {link}" if (link := safe_source_link(latest.get("source"))) else ""
-            lines.extend(["", f"**Global reset announced:** {announced}{suffix}"])
+            label = "Banked reset" if latest.get("reset_type") == "banked" else "Global reset"
+            lines.extend(["", f"**{label} announced:** {announced}{suffix}"])
             preview, fixes = reset_details(latest.get("text"))
             if preview:
                 lines.extend(["", f"> {preview}"])

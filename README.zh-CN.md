@@ -27,6 +27,7 @@ Cache Meter 把本地 Codex 会话日志变成一份 Codex 忘了放在同一个
 - 每个范围的完整 API 折算成本，包括 cached input、cache miss、已报告的 cache write、output，以及超过 272K 的请求按每次调用所用模型公开价格计算的 long-context 倍率。
 - 对已识别的 GPT-5.6 模型，仅使用 uncached input 与 cached input 的价格差计算缓存损失的 API 折算成本。
 - Codex 提供数据时，显示 5 小时窗口和每周窗口的自然重置时间。
+- 在 Codex App 中逐条显示每个可用的 banked reset 及其到期时间。
 - 来自 `codex-resets.com` 的可选第三方 Tibo 重置预测。
 
 美元金额按公开 API 价目表折算，不是 Codex 订阅的实际扣费。未知模型不计入金额估算；部分或推断出的估算会加上 `~`。价格以 [OpenAI 官方模型比较](https://developers.openai.com/api/docs/models/compare)为准。
@@ -52,7 +53,7 @@ codex plugin add cache-meter@cache-meter
 
 ## 隐私
 
-Cache Meter 读取 `$CODEX_HOME/sessions`（或 `~/.codex/sessions`）下的本地 JSONL 会话文件，不访问 Codex 凭据或账户 API。
+Cache Meter 的 Python 部分读取 `$CODEX_HOME/sessions`（或 `~/.codex/sessions`）下的本地 JSONL 会话文件，不访问 Codex 凭据或账户 API。在 Codex App 中，技能通过内置的只读用量限制工具获取 banked-reset 状态，并省略账户和 credit ID。
 
 除非使用 `--no-tibo`，否则它会向 `https://codex-resets.com/api/v1/status` 发出一次无需认证的只读 GET 请求。该预测来自第三方，并非 OpenAI 的承诺。
 

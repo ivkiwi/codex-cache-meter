@@ -27,6 +27,7 @@ When a switch knocks the cache cold, Cache Meter estimates how many cached token
 - Full API-equivalent cost for each scope, including cached input, cache misses, reported cache writes, output, and >272K long-context multipliers at each call's public model price.
 - Cache-loss API equivalent using only the uncached-vs-cached input price gap for recognized GPT-5.6 models.
 - Natural 5-hour and weekly reset times when Codex exposes them.
+- Every available banked reset with its own expiry in Codex App.
 - An optional third-party Tibo reset forecast from `codex-resets.com`.
 
 The dollar figures are API list-price equivalents, not billed Codex subscription spend. Unknown models are excluded from dollar estimates; partial or inferred estimates are prefixed with `~`. Prices follow the [official OpenAI model comparison](https://developers.openai.com/api/docs/models/compare).
@@ -52,7 +53,7 @@ Skip the public forecast request with:
 
 ## Privacy
 
-Cache Meter reads local JSONL session files under `$CODEX_HOME/sessions` (or `~/.codex/sessions`). It does not access Codex credentials or account APIs.
+The Python meter reads local JSONL session files under `$CODEX_HOME/sessions` (or `~/.codex/sessions`) and does not access Codex credentials or account APIs. In Codex App, the skill uses its built-in read-only usage-limits tool for banked-reset status and omits account and credit IDs.
 
 Unless `--no-tibo` is used, it makes one unauthenticated, read-only GET request to `https://codex-resets.com/api/v1/status`. The forecast is a third-party guess, not an OpenAI commitment.
 

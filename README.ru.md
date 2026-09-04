@@ -27,6 +27,7 @@ Cache Meter превращает локальные session logs в отчёт, 
 - Полный API-эквивалент каждого scope: cached input, cache misses, известные cache writes, output и long-context множители для запросов больше 272K по публичной цене модели каждого вызова.
 - API-эквивалент потери кэша только по разнице цен uncached/cached input для распознанных моделей GPT-5.6.
 - Естественное время сброса 5-часового и недельного лимитов, если Codex его отдал.
+- Каждый доступный banked reset с собственным сроком действия в Codex App.
 - Опциональный сторонний прогноз сброса Tibo с `codex-resets.com`.
 
 Суммы в долларах — эквиваленты по публичным API-тарифам, а не списания с подписки Codex. Неизвестные модели не входят в денежную оценку; частичная или расчётная оценка помечается `~`. Цены сверяются с [официальным сравнением моделей OpenAI](https://developers.openai.com/api/docs/models/compare).
@@ -52,7 +53,7 @@ codex plugin add cache-meter@cache-meter
 
 ## Приватность
 
-Cache Meter читает локальные JSONL-файлы сессий из `$CODEX_HOME/sessions` (или `~/.codex/sessions`) и не обращается к учётным данным или API аккаунта Codex.
+Python-часть Cache Meter читает локальные JSONL-файлы сессий из `$CODEX_HOME/sessions` (или `~/.codex/sessions`) и не обращается к учётным данным или API аккаунта Codex. В Codex App skill получает статус banked resets через встроенный read-only tool лимитов и не показывает идентификаторы аккаунта или кредитов.
 
 Без `--no-tibo` выполняется один неавторизованный read-only GET-запрос к `https://codex-resets.com/api/v1/status`. Это сторонний прогноз, а не обещание OpenAI.
 

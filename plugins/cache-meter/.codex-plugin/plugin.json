@@ -1,0 +1,40 @@
+{
+  "name": "cache-meter",
+  "version": "0.2.2",
+  "description": "See what the cache remembered, what a model switch made it forget, and what the same traffic would cost at API prices.",
+  "author": {
+    "name": "Ivan & Ada",
+    "url": "https://github.com/ivkiwi"
+  },
+  "homepage": "https://github.com/ivkiwi/codex-cache-meter",
+  "repository": "https://github.com/ivkiwi/codex-cache-meter",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "cache",
+    "usage",
+    "rate-limits",
+    "tibo",
+    "reset"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Cache Meter",
+    "shortDescription": "What the cache remembered, lost, and cost",
+    "longDescription": "Turns local Codex logs into cache hit rates, switch losses, recovery time, API-price equivalents, natural resets, banked-reset status, and Tibo's third-party crystal ball\u2014no dashboard safari.",
+    "developerName": "Ivan & Ada",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Local session analytics",
+      "Cache continuity estimates",
+      "API price equivalents",
+      "Natural reset times",
+      "Banked reset status",
+      "Tibo reset forecast"
+    ],
+    "defaultPrompt": [
+      "Show my cache meter.",
+      "How is my Codex prompt cache doing?"
+    ]
+  }
+}

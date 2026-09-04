@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
-SCRIPT = Path(__file__).parents[1] / "skills/cache-meter/scripts/cache_meter.py"
+SCRIPT = Path(__file__).parents[1] / "plugins/cache-meter/skills/cache-meter/scripts/cache_meter.py"
 SPEC = importlib.util.spec_from_file_location("cache_meter", SCRIPT)
 cache_meter = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = cache_meter
@@ -52,6 +52,8 @@ class CacheMeterTest(unittest.TestCase):
         self.assertIn("| Latest request | 100 | 80 | 20 | **80.0%** | 10 | **—** |", report)
         self.assertIn("Model/effort steady at `gpt-test/high`.", report)
         self.assertIn("No active global-reset watch.", cache_meter.render(data, now, {}))
+        banked = {"latest_reset": {"reset_type": "banked", "announced_at": now.isoformat()}}
+        self.assertIn("**Banked reset announced:**", cache_meter.render(data, now, banked))
         terminal = cache_meter.terminal_report(report)
         self.assertIn("┌", terminal)
         self.assertIn("│ Latest request", terminal)
