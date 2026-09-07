@@ -17,6 +17,7 @@ import urllib.request
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -36,11 +37,24 @@ LONG_CONTEXT_THRESHOLD = 272_000
 INTERACTIVE_SOURCES = frozenset({"vscode", "cli"})
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 API_PRICES_PER_MTOK = {
-    "gpt-5.6-sol": {"input": 4.00, "cached": 0.40, "output": 20.00},
-    "gpt-5.6-terra": {"input": 2.00, "cached": 0.20, "output": 12.00},
-    "gpt-5.6-luna": {"input": 0.20, "cached": 0.02, "output": 1.20},
-    "gpt-5.6": {"input": 4.00, "cached": 0.40, "output": 20.00},
+    "gpt-6-astra": {
+        "input": 10.00, "cached": 1.00, "cache_write": 12.50, "output": 50.00,
+        "input_above": 20.00, "cached_above": 2.00, "cache_write_above": 25.00, "output_above": 75.00,
+    },
+    "gpt-5.6-sol": {
+        "input": 4.00, "cached": 0.40, "cache_write": 5.00, "output": 20.00,
+        "input_above": 8.00, "cached_above": 0.80, "cache_write_above": 10.00, "output_above": 30.00,
+    },
+    "gpt-5.6-terra": {
+        "input": 2.00, "cached": 0.20, "cache_write": 2.50, "output": 12.00,
+        "input_above": 4.00, "cached_above": 0.40, "cache_write_above": 5.00, "output_above": 18.00,
+    },
+    "gpt-5.6-luna": {
+        "input": 0.20, "cached": 0.02, "cache_write": 0.25, "output": 1.20,
+        "input_above": 0.40, "cached_above": 0.04, "cache_write_above": 0.50, "output_above": 1.80,
+    },
 }
+API_PRICES_PER_MTOK["gpt-5.6"] = API_PRICES_PER_MTOK["gpt-5.6-sol"]
 
 
 def token_int(value: Any) -> int:
@@ -383,12 +397,12 @@ def switch_events(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     break
 
             lost = sum(loss for _, loss in losses)
-            premium = api_cache_premium(new[0])
-            priced_tokens = lost if premium is not None else 0
+            prices = api_prices(new[0])
+            priced_tokens = lost if prices is not None else 0
             api_equivalent = sum(
-                loss * premium * input_price_multiplier(Usage.from_raw(item["last"]).input) / 1_000_000
+                loss * (api_cache_premium(new[0], Usage.from_raw(item["last"]).input) or 0) / 1_000_000
                 for item, loss in losses
-            ) if premium is not None else 0.0
+            ) if prices is not None else 0.0
             events.append({
                 "time": after["time"],
                 "from_model": old[0],
@@ -416,24 +430,81 @@ def switch_events(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(events, key=lambda event: event["time"])
 
 
+def codexbar_pricing_path() -> Path:
+    return Path.home() / "Library" / "Caches" / "codexbar" / "model-pricing" / "models-dev-v1.json"
+
+
+def normalize_model(model: Any) -> str:
+    name = str(model or "").strip()
+    if name.startswith("openai/"):
+        name = name[len("openai/"):]
+    return re.sub(r"-\d{4}-\d{2}-\d{2}$", "", name)
+
+
+@lru_cache(maxsize=1)
+def codexbar_prices() -> dict[str, dict[str, float]]:
+    """Read the same auto-refreshed models.dev catalog used by TimeGate."""
+    try:
+        data = json.loads(codexbar_pricing_path().read_text(encoding="utf-8"))
+        models = data["catalog"]["providers"]["openai"]["models"]
+    except (OSError, json.JSONDecodeError, KeyError, TypeError):
+        return {}
+    if not isinstance(models, dict):
+        return {}
+
+    def rate(values: dict[str, Any], key: str, default: float | None = None) -> float:
+        value = float(values.get(key, default))
+        if not math.isfinite(value) or value < 0:
+            raise ValueError(key)
+        return value
+
+    result: dict[str, dict[str, float]] = {}
+    for model, entry in models.items():
+        try:
+            cost = entry["cost"]
+            prices = {
+                "input": rate(cost, "input"),
+                "cached": rate(cost, "cache_read", rate(cost, "input")),
+                "cache_write": rate(cost, "cache_write", rate(cost, "input") * 1.25),
+                "output": rate(cost, "output"),
+            }
+            above = cost.get("context_over_200k") or {}
+            if above:
+                prices.update({
+                    "input_above": rate(above, "input"),
+                    "cached_above": rate(above, "cache_read", rate(above, "input")),
+                    "cache_write_above": rate(above, "cache_write", rate(above, "input") * 1.25),
+                    "output_above": rate(above, "output"),
+                })
+            result[normalize_model(model)] = prices
+        except (AttributeError, KeyError, TypeError, ValueError):
+            continue
+    return result
+
+
 def api_prices(model: str) -> dict[str, float] | None:
-    for name in ("gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"):
-        if model == name or model.startswith(f"{name}-"):
-            return API_PRICES_PER_MTOK[name]
-    return API_PRICES_PER_MTOK.get(model)
+    name = normalize_model(model)
+    prices = codexbar_prices().get(name) or API_PRICES_PER_MTOK.get(name)
+    if prices:
+        return prices
+    for family in ("gpt-6-astra", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"):
+        if name.startswith(f"{family}-"):
+            return codexbar_prices().get(family) or API_PRICES_PER_MTOK[family]
+    return None
 
 
-def api_cache_premium(model: str) -> float | None:
+def context_price(prices: dict[str, float], key: str, input_tokens: int) -> float:
+    if input_tokens > LONG_CONTEXT_THRESHOLD and f"{key}_above" in prices:
+        return prices[f"{key}_above"]
+    return prices[key]
+
+
+def api_cache_premium(model: str, input_tokens: int = 0) -> float | None:
     prices = api_prices(model)
-    return prices["input"] - prices["cached"] if prices else None
-
-
-def input_price_multiplier(input_tokens: int) -> float:
-    return 2.0 if input_tokens > LONG_CONTEXT_THRESHOLD else 1.0
-
-
-def output_price_multiplier(input_tokens: int) -> float:
-    return 1.5 if input_tokens > LONG_CONTEXT_THRESHOLD else 1.0
+    return (
+        context_price(prices, "input", input_tokens) - context_price(prices, "cached", input_tokens)
+        if prices else None
+    )
 
 
 def usage_api_equivalent(records: list[dict[str, Any]]) -> dict[str, Any]:
@@ -454,14 +525,15 @@ def usage_api_equivalent(records: list[dict[str, Any]]) -> dict[str, Any]:
         cache_write = min(usage.miss, usage.cache_write) if cache_write_known else 0
         if usage.miss and not cache_write_known:
             estimated = True
-        input_multiplier = input_price_multiplier(usage.input)
+        input_price = context_price(prices, "input", usage.input)
+        cached_price = context_price(prices, "cached", usage.input)
+        cache_write_price = context_price(prices, "cache_write", usage.input)
+        output_price = context_price(prices, "output", usage.input)
         value += (
-            (
-                (usage.miss - cache_write) * prices["input"]
-                + cache_write * prices["input"] * 1.25
-                + usage.cached * prices["cached"]
-            ) * input_multiplier
-            + usage.output * prices["output"] * output_price_multiplier(usage.input)
+            (usage.miss - cache_write) * input_price
+            + cache_write * cache_write_price
+            + usage.cached * cached_price
+            + usage.output * output_price
         ) / 1_000_000
     return {
         "value": value,
@@ -609,7 +681,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 def fetch_tibo_status() -> dict[str, Any]:
     request = urllib.request.Request(
         TIBO_STATUS_URL,
-        headers={"Accept": "application/json", "User-Agent": "cache-meter/0.2.2"},
+        headers={"Accept": "application/json", "User-Agent": "cache-meter/0.2.3"},
     )
     with urllib.request.build_opener(NoRedirect).open(request, timeout=5) as response:
         raw = response.read(262_145)

@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -17,6 +18,9 @@ SPEC.loader.exec_module(cache_meter)
 
 
 class CacheMeterTest(unittest.TestCase):
+    def tearDown(self):
+        cache_meter.codexbar_prices.cache_clear()
+
     def test_prime_is_quiet_and_needs_no_sessions(self):
         result = subprocess.run(
             [sys.executable, str(SCRIPT), "--prime", "--sessions", "/missing"],
@@ -224,6 +228,34 @@ class CacheMeterTest(unittest.TestCase):
             ),
             "~$0.11",
         )
+
+    def test_astra_fallback_and_codexbar_catalog(self):
+        with mock.patch.object(cache_meter, "codexbar_pricing_path", return_value=Path("/missing")):
+            cache_meter.codexbar_prices.cache_clear()
+            astra = cache_meter.api_prices("gpt-6-astra")
+            self.assertEqual(
+                [astra[key] for key in ("input", "cached", "cache_write", "output")],
+                [10.0, 1.0, 12.5, 50.0],
+            )
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "models-dev-v1.json"
+            path.write_text(json.dumps({
+                "catalog": {"providers": {"openai": {"models": {
+                    "gpt-7-nebula": {"cost": {
+                        "input": 7, "cache_read": 0.7, "cache_write": 8.75, "output": 35,
+                        "context_over_200k": {
+                            "input": 14, "cache_read": 1.4, "cache_write": 17.5, "output": 52.5,
+                        },
+                    }},
+                }}}},
+            }), encoding="utf-8")
+            with mock.patch.object(cache_meter, "codexbar_pricing_path", return_value=path):
+                cache_meter.codexbar_prices.cache_clear()
+                nebula = cache_meter.api_prices("openai/gpt-7-nebula-2026-09-07")
+
+        self.assertEqual(nebula["input"], 7.0)
+        self.assertEqual(cache_meter.context_price(nebula, "output", 300_000), 52.5)
 
 
 if __name__ == "__main__":

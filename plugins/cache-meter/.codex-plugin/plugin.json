@@ -1,6 +1,6 @@
 {
   "name": "cache-meter",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "See what the cache remembered, what a model switch made it forget, and what the same traffic would cost at API prices.",
   "author": {
     "name": "Ivan & Ada",
@@ -27,7 +27,7 @@
     "capabilities": [
       "Local session analytics",
       "Cache continuity estimates",
-      "API price equivalents",
+      "Auto-refreshed API price equivalents",
       "Natural reset times",
       "Banked reset status",
       "Tibo reset forecast"

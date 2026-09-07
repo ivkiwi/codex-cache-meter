@@ -25,12 +25,12 @@ When a switch knocks the cache cold, Cache Meter estimates how many cached token
 - Latest request, current task, today, and rolling 30-day cache metrics.
 - Counts of model and reasoning-effort switches, material cache drops, estimated lost cached tokens, and recovery calls.
 - Full API-equivalent cost for each scope, including cached input, cache misses, reported cache writes, output, and >272K long-context multipliers at each call's public model price.
-- Cache-loss API equivalent using only the uncached-vs-cached input price gap for recognized GPT-5.6 models.
+- Cache-loss API equivalent using only the uncached-vs-cached input price gap for recognized models, including GPT-6 Astra.
 - Natural 5-hour and weekly reset times when Codex exposes them.
 - Every available banked reset with its own expiry in Codex App.
 - An optional third-party Tibo reset forecast from `codex-resets.com`.
 
-The dollar figures are API list-price equivalents, not billed Codex subscription spend. Unknown models are excluded from dollar estimates; partial or inferred estimates are prefixed with `~`. Prices follow the [official OpenAI model comparison](https://developers.openai.com/api/docs/models/compare).
+The dollar figures are API list-price equivalents, not billed Codex subscription spend. Unknown models are excluded from dollar estimates; partial or inferred estimates are prefixed with `~`. When available, Cache Meter reads the same auto-refreshed `models.dev` catalog cached by CodexBar and used by TimeGate, so new models and price changes require no plugin release. Bundled prices, including GPT-6 Astra, are the offline fallback and follow the [official OpenAI model comparison](https://developers.openai.com/api/docs/models/compare).
 
 ## Install
 
@@ -53,7 +53,7 @@ Skip the public forecast request with:
 
 ## Privacy
 
-The Python meter reads local JSONL session files under `$CODEX_HOME/sessions` (or `~/.codex/sessions`) and does not access Codex credentials or account APIs. In Codex App, the skill uses its built-in read-only usage-limits tool for banked-reset status and omits account and credit IDs.
+The Python meter reads local JSONL session files under `$CODEX_HOME/sessions` (or `~/.codex/sessions`) and, when present, CodexBar's local model-pricing cache. It does not invoke CodexBar or access Codex credentials or account APIs. In Codex App, the skill uses its built-in read-only usage-limits tool for banked-reset status and omits account and credit IDs.
 
 Unless `--no-tibo` is used, it makes one unauthenticated, read-only GET request to `https://codex-resets.com/api/v1/status`. The forecast is a third-party guess, not an OpenAI commitment.
 
