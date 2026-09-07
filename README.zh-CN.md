@@ -8,17 +8,64 @@ Cache Meter 把本地 Codex 会话日志变成一份 Codex 忘了放在同一个
 
 一次切换让缓存骤冷时，Cache Meter 会估算有多少 cached tokens 蒸发了，以及同样的流量按公开 API 价目表要花多少钱。如果金额看起来像一小笔基础设施预算，先别慌：这只是按 API 标价折算的金额，不是你的 Codex 账单。一条命令、本地 JSONL、不用在 dashboard 里探险、不调用账户 API、不安装任何 Python 依赖。
 
-```text
-| Scope           | Input | Cache hit | Cache miss | Hit rate | Output | API equivalent |
-|-----------------|-------|-----------|------------|----------|--------|----------------|
-| Latest request  | 33.2K | 32.5K     | 662        | 98.0%    | 1.2K   | $0.04          |
-| Current task    | 98.8K | 81.2K     | 17.6K      | 82.1%    | 4.8K   | $0.20          |
+## 完整报告示例
 
-| Period          | Switches | Drops ≥20 pp | Est. lost cache | API equivalent |
-|-----------------|----------|--------------|-----------------|----------------|
-| Today           | 2        | 2            | 139.2K          | $0.50          |
-| Rolling 30 days | 12       | 11           | 1.37M           | $4.20          |
-```
+2026 年 9 月 7 日的实际输出（Europe/Istanbul）。用量、价格、重置时间和预测均为当时的历史快照。
+
+## Cache Meter
+
+`gpt-6-astra` · `medium` · local JSONL
+
+| Scope | Input | Cache hit | Cache miss | Hit rate | Output | API equivalent |
+|---|---:|---:|---:|---:|---:|---:|
+| Latest request | 34.9K | 20.5K | 14.4K | **58.6%** | 221 | **$0.18** |
+| Current task | 34.9K | 20.5K | 14.4K | **58.6%** | 221 | **$0.18** |
+| Today | 135.24M | 128.59M | 6.65M | **95.1%** | 529.6K | **~$136.69** |
+| Rolling 30 days | 6.65B | 6.40B | 255.14M | **96.2%** | 22.84M | **~$3508.79** |
+
+Current model base prices: input **$10.00/MTok** · cached **$1.00/MTok** · output **$50.00/MTok**.
+
+### Cache continuity
+
+| Period | Switches | Drops ≥20 pp | Est. lost cache | API equivalent |
+|---|---:|---:|---:|---:|
+| Today | 3 | 3 | 362.7K | **$2.75** |
+| Rolling 30 days | 39 | 37 | 4.87M | **$17.63** |
+
+30-day split: **8** model changes · **34** effort changes · **2.7** calls average recovery among recovered drops.
+
+Latest material drop: `gpt-5.6-sol/max` → `gpt-5.6-sol/high` · **96.0%** → **0.0%** (−96.0 pp) · recovered in **7** calls · **95.5K** estimated cached tokens lost · **$0.34** API equivalent.
+
+Current task: Model/effort steady at `gpt-6-astra/medium`.
+
+Scope API equivalents include cached input, cache misses, reported cache writes, output, and >272K long-context multipliers at public per-call model prices. `~` marks partial or inferred pricing. The continuity equivalent is only the uncached-vs-cached price gap caused by estimated cache loss. Neither is billed Codex spend; unknown models are excluded. Continuity excludes auto-review and subagent traffic.
+
+### Rate-limit runway
+
+| Window | Used | Natural reset |
+|---|---|---|
+| 5 hours | — | Not exposed |
+| Week | 10% [#-----------] | Mon 14 Sep, 09:46 |
+
+### Tibo
+
+**Next reset:** 45% · elevated · within 24h · until Mon 07 Sep, 23:09
+
+> @Gelassoldat @rezoundous Who says it won't reset in a while 👀
+
+Source: [@thsottiaux](https://x.com/thsottiaux/status/2096692394435752258)
+
+**Banked reset announced:** Sat 05 Sep, 03:39 · [@thsottiaux](https://x.com/thsottiaux/status/2096035437299237298)
+
+> Because we are beyond happy to have Astra rolled out today ahead of schedule and you have been super patient with us \(not really, but it’s ok\!\)… we will do the full banked reset today too for all Plus, Pro and Business users&#46; Lands end of day&#46; Happy Astra day and enjoy a phenomenal weekend&#46; PS&#58; If you create the account or upgrade before 8pm PT you will get it too&#46; Still time\!
+
+### Banked resets
+
+- **Full reset** — available · expires **Mon 21 Sep 2026, 03:00** (Europe/Istanbul)
+- **Full reset** — available · expires **Sun 04 Oct 2026, 04:58** (Europe/Istanbul)
+- **Full reset** — available · expires **Mon 05 Oct 2026, 07:18** (Europe/Istanbul)
+
+---
 
 ## 显示内容
 
